@@ -1,0 +1,20 @@
+name: Reusable pipeline
+on:
+  workflow_call:
+    inputs:
+      environment:
+        default: "dev"
+        description: "The environment being run on"
+        type: string
+
+        secrets:
+          description: "Secrets to use for this job"
+          AWS-ROLE-ARN:
+            required: true
+
+jobs:
+  deploy:
+    name: "Dockerfile deploy"
+      steps:
+        - uses: actions/checkout@v4
+        - run: make deploy ENV=${{ inputs.environment }}
