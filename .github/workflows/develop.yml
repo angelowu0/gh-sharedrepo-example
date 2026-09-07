@@ -8,7 +8,7 @@ on:
         type: string
 
       environment:
-        default: "dev"
+        required: true
         description: "The environment being run on"
         type: string
 
@@ -21,6 +21,7 @@ jobs:
   deploy:
     name: "Dockerfile deploy"
     runs-on: ${{ inputs.runs_on }}
+    environment: ${{ inputs.environment }}
     steps:
     - uses: actions/checkout@v4
     - run: make deploy ENV=${{ inputs.environment }}
