@@ -1,0 +1,36 @@
+name: Reusable security scan
+
+on:
+  workflow_call:
+    inputs:
+      severity:
+        default: "CRITICAL,HIGH"
+        description: "Severity levels to fail on"
+        type: string
+
+jobs:
+  security-scan:
+    name: "Security scan"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install hadolint
+        run: |
+          sudo wget -O /usr/local/bin/hadolint https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Linux-x86_64
+          sudo chmod +x /usr/local/bin/hadolint
+
+      - name: Install trivy
+        run: |
+          sudo apt-get install -y wget apt-transport-https gnupg lsb-release
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor | sudo tee /usr/share/keyrings/trivy.gpg > /dev/null
+          echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install -y trivy
+
+      - name: Run security gate
+        env:
+          SEVERITY: ${{ inputs.severity }}
+        run: |
+          chmod +x security_gate.sh
+          ./security_gate.sh
